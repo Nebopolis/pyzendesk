@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='pyzendesk',
     version='0.0.1',
-    packages=['pyzendesk, tests'],
+    packages=['pyzendesk', 'pyzendesk/tests'],
     install_requires=[
         'simplejson >= 3.3.3',
         'requests >= 2.2.1',
