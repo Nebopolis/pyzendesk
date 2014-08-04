@@ -9,8 +9,6 @@ from json import JSONEncoder
 
 class Endpoint(object):
 
-    Field = namedtuple('Field', 'read_only required post_required post put')
-
     def __init__(self, **kwargs):
         self.attributes = Attribute(type(self).__name__).attributes
         for name, value in self.attributes.items():
@@ -20,36 +18,52 @@ class Endpoint(object):
             if not self.attributes[name].post:
                 warnings.warn('Writing to non-editable field: ' + name, RuntimeWarning, stacklevel=2)
             setattr(self, name, value)
-    
-    def put():
-        print("hello")
 
-    def post(subject, comment, **kwargs):
-        ticket = {
-            'subject': subject,
-            'comment': comment
-        }
-        ticket.update(kwargs)
-        try:
-            created = session.post({'ticket', ticket})
-            return created
-        except AttributeError:
-            return None
+    def update(self, json='', session=None):
+        if json:
+            data = [a for a in self.attributes if a in json]
+            for key in data:
+                setattr(self, key, json[key])
+        elif self.url and session:
+            response = session.get_id(self.url, self.id)
+            json = response.json()[type(self).__name__.lower()]
+            self.update(json)
+        else: 
+            warnings.warn('Updating object with no valid network ID', RuntimeWarning, stacklevel=2)
 
-    def __encode__(obj):
-        if isinstance(obj, Endpoint):
-            attributes = [a for a in dir(obj) if a in obj.attributes]
+    def put(self, session, id, url):
+        put_attrs = [a for a in self.attributes if self.attributes[a].put]
+        response = session.put(url, self.id, self.serialize(put_attrs))
+        json = response.json()[type(self).__name__.lower()]
+        self.update(json) 
+
+        return response
+
+    def post(self, session, url):
+        post_attrs = [a for a in self.attributes if self.attributes[a].post]
+        response = session.post(url, self.serialize(post_attrs))
+        json = response.json()[type(self).__name__.lower()]
+        self.update(json)
+
+        return response
+
+    def __encode__(self, attributes=''):
+        if not attributes:
+            attributes = self.attributes
+        if isinstance(self, Endpoint):
+            attributes = [a for a in dir(self) if a in attributes]
             data={}
             for value in attributes:
-                attr = getattr(obj, value)
+                attr = getattr(self, value)
                 if isinstance(attr, Endpoint):
                     attr = attr.__encode__()
                 data[value] = attr
             return data
-        raise TypeError(repr(obj) + " is not JSON serializable")
+        raise TypeError(repr(self) + " is not JSON serializable")
 
-    def serialize(self):
-        data = self.__encode__()
+    def serialize(self, attributes=''):
+        data = {}
+        data[type(self).__name__.lower()] = self.__encode__(attributes)
         return json.dumps(data);
 
 class Attribute(object):
