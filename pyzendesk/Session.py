@@ -13,8 +13,9 @@ class Session:
             self.password = token
             self.user = user + '/token'
 
-    def get_all(self, url):
-        url = url.format(self.subdomain)
+    def get_all(self, url, page=1):
+        url = url.format(self.subdomain, page)
+        print(url);
         response = requests.get(url, auth=(self.user,self.password))
         print(response.status_code)
         return response
