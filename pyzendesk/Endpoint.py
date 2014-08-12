@@ -34,6 +34,9 @@ class Endpoint(object):
     def put(self, session, id, url):
         put_attrs = [a for a in self.attributes if self.attributes[a].put]
         response = session.put(url, self.id, self.serialize(put_attrs))
+        if response.status_code == 422:
+            print(response.json)
+            return response.json
         json = response.json()[type(self).__name__.lower()]
         self.update(json) 
 
@@ -42,6 +45,9 @@ class Endpoint(object):
     def post(self, session, url):
         post_attrs = [a for a in self.attributes if self.attributes[a].post]
         response = session.post(url, self.serialize(post_attrs))
+        if response.status_code == 422:
+            print(response.json())
+            return response.json
         json = response.json()[type(self).__name__.lower()]
         self.update(json)
 
@@ -103,11 +109,22 @@ class Attribute(object):
             'created_at': { 'read_only' },
             'updated_at': { 'read_only' },
         },
-        'Endpoint': {
-            'id': {'read_only'},
-            'url': {'read_only'},
-            'created_at': {'read_only'},
-            'updated_at': {'read_only'}
+        'Group_Membership': {
+            'id': { 'read_only' },
+            'url': { 'read_only' },
+            'user_id': { 'post_required', 'post' },
+            'group_id': { 'post_required', 'post' },
+            'default': { 'post' },
+            'created_at': { 'read_only' },
+            'updated_at': { 'read_only' },
+        },
+        'Group': {
+            'id': { 'read_only' },
+            'url': { 'read_only' },
+            'name': { 'post_required', 'required', 'post', 'put' },
+            'deleted': { 'read_only' },
+            'created_at': { 'read_only' },
+            'updated_at': { 'read_only' },
         },
     }
 
