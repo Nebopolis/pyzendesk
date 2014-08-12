@@ -1,7 +1,10 @@
 import requests
-from Ticket import Requester as Ticket_Requester
+from Tickets import Requester as Ticket_Requester
+from Group_Memberships import Requester as Group_Membership_Requester
+from Groups import Requester as Group_Requester
 
 __author__ = 'bevans'
+
 
 class Session:
 
@@ -35,12 +38,17 @@ class Session:
     def tickets(self):
         return Ticket_Requester(self)
 
+    @property
+    def group_memberships(self):
+        return Group_Membership_Requester(self)
+
+    @property
+    def groups(self):
+        return Group_Requester(self)
+
+
 def checkCreds(subdomain='z3nbe',user='bevans@zendesk.com',pwd='Oo87GVNSxuuN'):
     url = 'https://{0}.zendesk.com/api/v2/tickets.json'.format(subdomain)
     response = requests.get(url, auth=(user,pwd))
     print(response.status_code)
     return response
-
-
-
-

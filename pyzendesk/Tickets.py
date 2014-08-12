@@ -1,16 +1,8 @@
-__author__ = 'bevans'
-
-import os
-import requests
-import simplejson as json
-from collections import namedtuple
-import warnings
-from json import JSONEncoder
 from Endpoint import Endpoint
 from Endpoint import from_properties
 from Endpoint import Requester as Endpoint_Requester
-import Session
 
+__author__ = 'bevans'
 
 
 class Ticket(Endpoint):
@@ -61,6 +53,7 @@ class Ticket(Endpoint):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+
 class Requester(Endpoint_Requester):
 
     endpoint_name = 'ticket'
@@ -74,6 +67,7 @@ class Requester(Endpoint_Requester):
     def __init__(self, session):
         super().__init__(session)
 
+
 def main():
     from Session import Session
     session = Session(
@@ -84,4 +78,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

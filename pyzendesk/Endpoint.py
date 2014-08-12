@@ -1,12 +1,6 @@
-__author__ = 'bevans'
-
-import os
-import requests
-import simplejson as json
 from collections import namedtuple
-import warnings
-from json import JSONEncoder
 
+__author__ = 'bevans'
 
 class Endpoint(object):
 
@@ -84,63 +78,6 @@ def from_properties(endpoint):
                 attribute[prop] = True if prop in value else False
             attributes[name] = Field(**attribute)
     return attributes
-    '''
-    endpoint_attributes = {
-        'Ticket': {
-            'id': { 'read_only' },
-            'url': { 'read_only' },
-            'external_id': { 'post', 'put' },
-            'type': { 'post', 'put' },
-            'subject': { 'post_required', 'post','put' },
-            'description': { 'read_only' },
-            'comment': { 'required', 'post_required', 'post', 'put' },
-            'priority': { 'post', 'put' },
-            'status': { 'post', 'put' },
-            'recipient': { 'read_only' },
-            'requester_id': { 'post', 'put' },
-            'submitter_id': { 'post' },
-            'assignee_id': { 'post', 'put' },
-            'organization_id': { 'read_only' },
-            'group_id': { 'post', 'put' },
-            'collaborator_ids': { 'post', 'put' },
-            'forum_topic_id': { 'post', 'put' },
-            'problem_id': { 'post', 'put' },
-            'has_incidents': { 'read_only' },
-            'due_at': { 'post', 'put' },
-            'tags': { 'post', 'put' },
-            'via': { 'read_only' },
-            'custom_fields': { 'post', 'put' },
-            'satisfaction_rating': { 'read_only' },
-            'sharing_agreement_ids': { 'read_only' },
-            'followup_ids': { 'read_only' },
-            'ticket_form_id': { 'read_only' },
-            'brand_id': { 'read_only' },
-            'created_at': { 'read_only' },
-            'updated_at': { 'read_only' },
-        },
-        'Group_Membership': {
-            'id': { 'read_only' },
-            'url': { 'read_only' },
-            'user_id': { 'post_required', 'post' },
-            'group_id': { 'post_required', 'post' },
-            'default': { 'post' },
-            'created_at': { 'read_only' },
-            'updated_at': { 'read_only' },
-        },
-        'Group': {
-            'id': { 'read_only' },
-            'url': { 'read_only' },
-            'name': { 'post_required', 'required', 'post', 'put' },
-            'deleted': { 'read_only' },
-            'created_at': { 'read_only' },
-            'updated_at': { 'read_only' },
-        },
-        'Endpoint': {
-            'for_example_only': { 'read_only' },
-        },
-    }
-
-    '''
 
 class Requester(object):
 
