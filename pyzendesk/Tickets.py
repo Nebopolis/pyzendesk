@@ -4,7 +4,6 @@ from Endpoint import Requester as Endpoint_Requester
 
 __author__ = 'bevans'
 
-
 class Ticket(Endpoint):
 
     attributes = {
@@ -66,7 +65,6 @@ class Requester(Endpoint_Requester):
 
     def __init__(self, session):
         super().__init__(session)
-
 
 def main():
     from Session import Session
