@@ -52,7 +52,6 @@ class Ticket(Endpoint):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-
 class Requester(Endpoint_Requester):
 
     endpoint_name = 'ticket'

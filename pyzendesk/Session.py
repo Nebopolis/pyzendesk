@@ -1,54 +1,69 @@
 import requests
-from Tickets import Requester as Ticket_Requester
-from Group_Memberships import Requester as Group_Membership_Requester
-from Groups import Requester as Group_Requester
+from RequestQueue import RequestQueue
 
 __author__ = 'bevans'
 
 
 class Session:
 
-    def __init__(self, subdomain,user,password='',token=''):
-        self.subdomain = subdomain
-        self.user = user
+    def __init__(self, base_url, user, password='', token=''):
+        self.queue = RequestQueue(request_limit=600)
+        self.base_url = base_url
         if password and not token:
-            self.password = password
+            password = password
         if token:
-            self.password = token
-            self.user = user + '/token'
+            password = token
+            user = user + '/token'
+        self.session = requests.Session()
+        self.session.auth = (user, password)
 
-    def get(self, url):
-        response = requests.get(url, auth=(self.user,self.password))
-        print(response.status_code)
-        return response
+    def create_url(self, endpoint, params = None, page = 1):
+        param_string = params or []
+        param_string = param_string if type(param_string) is list else [param_string]
+        param_string.append('page={}'.format(page))
+        param_string = '&'.join(param_string)
+        url = '{}/{}?{}'.format(self.base_url, endpoint, param_string)
+        return url
 
-    def post(self, url, json):
+    def get(self, endpoint, params = None, page = None):
+        url = self.create_url(endpoint, params)
+        response = self.queue.process((url, self.session.get))
+        return next(response)
+
+    def get_all(self, endpoint, params = None):
+        first_page = self.get(endpoint, params)
+        count = first_page.json()['count']
+        try:
+            page_count = first_page.json()['page_count']
+        except KeyError:
+            if count > 100:
+                page_count = count // 100
+                if count % 100 > 0:
+                    page_count = page_count + 1
+            else:
+                page_count = 1
+        responses = self.queue.process([(self.create_url(endpoint, params, page),self.session.get) for page in range(1,page_count + 1)])
+        return responses
+
+    def post(self, endpoint, json):
+        url = self.create_url(endpoint)
         headers = {'Accept':'application/json', 'Content-Type':'application/json'}
-        response = requests.post(url, auth=(self.user,self.password), data=json, headers=headers)
-        print(response.status_code)
-        return response
+        response = self.queue.process((url, lambda url: self.session.post(url, data=json, headers=headers)))
+        return next(response)
 
-    def put(self, url, json):
+    def put(self, endpoint, json):
+        url = self.create_url(endpoint)
         headers = {'Accept':'application/json', 'Content-Type':'application/json'}
-        response = requests.put(url, auth=(self.user,self.password), data=json, headers=headers)
-        print(response.status_code)
-        return response
-
-    @property
-    def tickets(self):
-        return Ticket_Requester(self)
-
-    @property
-    def group_memberships(self):
-        return Group_Membership_Requester(self)
-
-    @property
-    def groups(self):
-        return Group_Requester(self)
+        response = self.queue.process((url, lambda url: self.session.put(url, data=json, headers=headers)))
+        return next(response)
 
 
-def checkCreds(subdomain='z3nbe',user='bevans@zendesk.com',pwd='Oo87GVNSxuuN'):
-    url = 'https://{0}.zendesk.com/api/v2/tickets.json'.format(subdomain)
-    response = requests.get(url, auth=(user,pwd))
-    print(response.status_code)
-    return response
+def main():
+    z3nbe = Session('https://z3nbe.zendesk.com/api/v2', user='zendesk@runasroot.net', token='ExYtkWBYio2KwTedfZ1zgDABL4KPZC8mUUau6iwu')
+    tickets = z3nbe.get_all('tickets')
+    for ticket in tickets:
+        print(ticket)
+    
+
+if __name__ == '__main__':
+    main()

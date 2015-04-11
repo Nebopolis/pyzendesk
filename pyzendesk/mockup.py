@@ -15,7 +15,7 @@ class ZendeskSession:
 
 def main():
     #example of api usage
-    z3nbe = Session('z3nbe')
+    z3nbe = Session('z3nbe', limit=100)
     z3nbe.vault.password = 'testpw' #omit to instead require password at command line to run
 
     z3nbe.credentials = z3nbe.vault(user='user@user.test', type='oauth', grant='read write') or \ 
@@ -24,7 +24,7 @@ def main():
     for ticket in z3nbe.tickets:
         print(ticket.description)
 
-    ticket = z3nbe.tickets.id = 450  #allow numeric indexing (lookup by ID)
+    ticket = z3nbe.tickets(450)  #allow numeric indexing (lookup by ID)
     print(test_ticket.assignee.name) #automatically look up sub-objects based on ID in parent object
     print(test_ticket.requester.orginization.name) #look up sub objects recursively as long as is needed
 
@@ -35,14 +35,14 @@ def main():
     user_search = search.users #'lazy mapping' - only go as deep as is needed to find an array of the requested objects 
                                #in this case would only return the users found in the search and not any users from
                                #tickets in the search
-    user_expanded_search = search.users.append(search.tickets.users) #seems a bit clunky and will have to look up how to append generators to each other
+    user_expanded_search = search.user | search.tickets.users #combine a list of users within tickets and users returned from a search
 
     #how to both allow indexing by depth (10th element) and ID (#10) especially with a diffrent type of sort
     #perhaps:
 
     ticket_list = z3nbe.tickets(range(50,100)) #get all tickets between ID 50 and ID 100
     ticket = z3nbe.ticket[10] #get the 10th ticket in this list
-    ticket_list = z3nbe.tickets.id = [103, 55, 111]
+    ticket_list = z3nbe.tickets([14,55,666])
     ticket = z3nbe.ticket[2] #ticket 111
 
     tickets(id)            #get a specific ticket
@@ -64,8 +64,73 @@ def main():
 
 
 
+    collection = z3nbe.tickets(range(50,100))
+    collection.get()
+    collection[0].description
+    z3nbe.tickets(range(0,1000000000))
+    descriptions = [ticket.description for ticket in collection]
 
 
+    **_id
 
+    ticket.** 
+
+    z3nbe.**(id)
+
+    userid = z3nbe.tickets(11).assignee_id
+    user_name = z3nbe.users(userid).name
+
+    name = z3nbe.tickets(11).assignee.name
+
+
+    ***_id
+
+    requester 
+
+
+{
+  "id":               35436,
+  "url":              "https://company.zendesk.com/api/v2/tickets/35436.json",
+  "external_id":      "ahg35h3jh",
+  "created_at":       "2009-07-20T22:55:29Z",
+  "updated_at":       "2011-05-05T10:38:52Z",
+  "type":             "incident",
+  "subject":          "Help, my printer is on fire!",
+  "raw_subject":      "{{dc.printer_on_fire}}",
+  "description":      "The fire is very colorful.",
+  "priority":         "high",
+  "status":           "open",
+  "recipient":        "support@company.com",
+  "requester_id":     "https://company.zendesk.com/api/v2/users/20978392.json",
+  "submitter_id":     "https://company.zendesk.com/api/v2/users/76872.json",
+  "assignee_id":      235323,
+  "organization_id":  509974,
+  "group_id":         98738,
+  "collaborator_ids": [35334, 234],
+  "forum_topic_id":   72648221,
+  "problem_id":       9873764,
+  "has_incidents":    false,
+  "due_at":           null,
+  "tags":             ["enterprise", "other_tag"],
+  "via": {
+    "channel": "web"
+  },
+  "custom_fields": [
+    {
+      "id":    27642,
+      "value": "745"
+    },
+    {
+      "id":    27648,
+      "value": "yes"
+    }
+  ],
+  "satisfaction_rating": {
+    "id": 1234,
+    "score": "good",
+    "comment": "Great support!"
+  },
+  "sharing_agreement_ids": [84432]
+}
 
 
