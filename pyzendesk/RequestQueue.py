@@ -31,13 +31,16 @@ class BasicCache:
         self.cache.clear()
 
 class RequestQueue:
-    def __init__(self, request_limit=200, num_workers=10):
+    def __init__(self, request_limit=200, num_workers=10, cache=None):
         self.max_speed     = 60/request_limit
         self.request_limit = request_limit
         self.request_queue = Queue()
         self.token_queue   = Queue()
         self.start_workers(num_workers)
-        self.cache = BasicCache()
+        if cache:
+            self.cache = cache
+        else:
+            self.cache = BasicCache()
 
     def start_workers(self, num):
         ticker = Thread(target=self.timer)

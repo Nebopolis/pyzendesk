@@ -6,27 +6,16 @@ __author__ = 'bevans'
 
 class Session:
 
-    def __init__(self, base_url, user, password='', token=''):
-        self.queue = RequestQueue(request_limit=600)
-        self.base_url = base_url
-        if password and not token:
-            password = password
-        if token:
-            password = token
-            user = user + '/token'
+    def __init__(self, creds, queue):
+        self.queue = queue
         self.session = requests.Session()
-        self.session.auth = (user, password)
+        self.auth = creds
+        self.session.auth = creds.auth
+        self.create_url = creds.create_url
 
-    def create_url(self, endpoint, params = None, page = 1):
-        param_string = params or []
-        param_string = param_string if type(param_string) is list else [param_string]
-        param_string.append('page={}'.format(page))
-        param_string = '&'.join(param_string)
-        url = '{}/{}?{}'.format(self.base_url, endpoint, param_string)
-        return url
 
     def get(self, endpoint, params = None, page = None):
-        url = self.create_url(endpoint, params)
+        url = self.auth.create_url(endpoint, params)
         response = self.queue.process((url, self.session.get))
         return next(response)
 
@@ -42,20 +31,21 @@ class Session:
                     page_count = page_count + 1
             else:
                 page_count = 1
-        responses = self.queue.process([(self.create_url(endpoint, params, page),self.session.get) for page in range(1,page_count + 1)])
+        responses = self.queue.process([(self.auth.create_url(endpoint, params, page),self.session.get) for page in range(1,page_count + 1)])
         return responses
 
     def post(self, endpoint, json):
-        url = self.create_url(endpoint)
+        url = self.auth.create_url(endpoint)
         headers = {'Accept':'application/json', 'Content-Type':'application/json'}
         response = self.queue.process((url, lambda url: self.session.post(url, data=json, headers=headers)))
         return next(response)
 
     def put(self, endpoint, json):
-        url = self.create_url(endpoint)
+        url = self.auth.create_url(endpoint)
         headers = {'Accept':'application/json', 'Content-Type':'application/json'}
         response = self.queue.process((url, lambda url: self.session.put(url, data=json, headers=headers)))
         return next(response)
+
 
 
 def main():
