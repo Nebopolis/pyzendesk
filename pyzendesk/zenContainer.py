@@ -24,52 +24,62 @@ class zenList:
 
 class zenContainer:
 
-    def __init__(self, wrapper, member, id=None, endpoint=None, data=None):
-        if data:
-            self.raw = data
+    def __init__(self, wrapper, member, object_id=None, data=None):
         self.raw = data or {}
-        self.remote_endpoints = wrapper.remote_endpoints
-        self.session = wrapper.session
         if data:
             self.should_refresh = False
         else:
             self.should_refresh = True
-        if endpoint:
-            self.endpoint = endpoint
-        else:
-            self.endpoint = '{}s/{}'.format(member, id)
+        self.wrapper = wrapper
         self.member = member
-        self.url = self.session.create_url(self.endpoint)
+        self.singular = self.wrapper.all_endpoints[member]['singular']
+        self.plural = self.wrapper.all_endpoints[member]['plural']
+        if object_id:
+            self.endpoint = '{}/{}'.format(self.plural, object_id)
+        else:
+            self.endpoint = '{}'.format(self.plural)
+        self.url = self.wrapper.session.create_url(self.endpoint)
+        self.wrapper.object_cache[self.endpoint] = self
+        self.get()
 
     def update(self, data):
         if self.id:
             print('put')
+            self.wrapper.session.put(self.endpoint, self.raw)
         else:
             print('post')
+            self.wrapper.session.post(self.endpoint, self.raw)
 
-    def fetch(self, cache=True):
-        self.raw.update(self.session.get(self.endpoint).json()[self.member])
-        self.should_refresh = False
-
+    def get(self, cache=True):
+        if(self.should_refresh):
+            self.should_refresh = False
+            if not cache:
+                self.wrapper.queue.cache.delete(self.url)
+            data = self.wrapper.session.get(self.endpoint).json()[self.singular]
+            self.raw.update(data)
+        else:
+            return self.raw
+        return data
 
     def __getattr__(self,key):
-        if(self.raw['should_refresh']):
-            self.fetch()
-        if(key is 'session'):
-            super().__getattr__(key)
-        elif(key is 'raw'):
+        if(key is 'raw'):
             super().__getattr__(key)
         elif(key is 'should_refresh'):
             return self.raw['should_refresh']
-        elif((key in self.raw['remote_endpoints'])):
+        elif((key in self.raw['wrapper'].remote_endpoints)):
             if(key in self.raw):
                 return self.raw[key]
             id_key = self.raw['{}_id'.format(key)]
             if not id_key:
                 return None
-            member = self.raw['remote_endpoints'][key]
-            endpoint = '{}s/{}.json'.format(member, id_key)
-            self.raw[key] = zenContainer(self.session, member, id_key)
+            singular = self.raw['wrapper'].all_endpoints[key]['singular']
+            plural = self.raw['wrapper'].all_endpoints[singular]['plural']
+            endpoint = '{}/{}'.format(plural, id_key)
+            if(endpoint in self.wrapper.object_cache):
+                 self.raw[key] = self.wrapper.object_cache[endpoint]
+            else:
+                new_obj = zenContainer(self.wrapper, singular, object_id=id_key)
+                self.raw[key] = new_obj
             return self.raw[key]
         try:
             return self.raw[key]
@@ -77,8 +87,6 @@ class zenContainer:
             raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if(key is 'session'):
-            super().__setattr__(key, value)
         if(key is 'raw'):
             super().__setattr__(key, value)
         else:
@@ -116,6 +124,8 @@ class zenContainer:
 
     def __repr__(self):
         return repr(self.raw)
+
+
 
 def main():
     z3nbe = Session('https://z3nbe.zendesk.com/api/v2', user='zendesk@runasroot.net', token='ExYtkWBYio2KwTedfZ1zgDABL4KPZC8mUUau6iwu')

@@ -23,37 +23,52 @@ class zenCredentials():
         url = '{}/{}?{}'.format(self.base_url, endpoint, param_string)
         return url.format(self.subdomain)
 
-class Wrapper:
+
+    
+class Wrapper: 
 
     def __init__(self, credentials):
         self.credentials = credentials
         self.queue = RequestQueue(request_limit=600)
         self.session = Session(self.credentials, self.queue)
-        self.plural = 'tickets'
-        self.singular = 'ticket'
         self.remote_endpoints = {'requester':'user', 'assignee':'user', 'organization': 'organization'}
+        self.all_endpoints = {'ticket':{'plural':'tickets', 'singular':'ticket'}, 'organization':{'plural':'organizations', 'singular':'organization'}}
+        self.object_cache = {}
 
-    def get_all(self):
-        responses = self.session.get_all(self.plural)
-        objects = itertools.chain.from_iterable(((zenContainer(self, 'ticket', ticket['id'], data=ticket) for ticket in response.json()[self.plural]) for response in responses))
+    def get_all(self, member, fetch=False):
+        singular = self.all_endpoints[member]['singular']
+        plural = self.all_endpoints[member]['plural']
+        responses = self.session.get_all(plural)
+        objects = itertools.chain.from_iterable(((zenContainer(self, singular, item['id'], data=item) for item in response.json()[plural]) for response in responses))
+        if(fetch):
+            objects = list(objects)
         return objects
 
-    def get(self, id, cache=True):
-        location = '{}/{}'.format(self.plural, id)
-        url = self.session.create_url(location)
-        if not cache:
-            self.queue.cache.delete(url)
-        data = self.session.get(endpoint).json()[self.singular]
+
+
 
 
         
 def main():
     creds = zenCredentials('z3nbe', 'zendesk@runasroot.net', token='ExYtkWBYio2KwTedfZ1zgDABL4KPZC8mUUau6iwu')
     z3nbe = Wrapper(creds)
-    x = iter(z3nbe.get_all())
-    print(next(x))
+    x = iter(z3nbe.get_all('ticket'))
+    # for i in x:
+    #     print(i.raw_subject)
+
+    y = iter(z3nbe.get_all('organization', fetch=True))
     for i in x:
-        print(i.raw_subject)
+        if i.organization_id:
+            print(i.organization.created_at)
+        print(i.organization_id)
+
+    # for i in x:
+    #     if i.organization_id:
+    #         print(i.raw_subject)
+        # print(i.organization_id)
+
+
+
 
 if __name__ == '__main__':
     main()
