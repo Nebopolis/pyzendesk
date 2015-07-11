@@ -19,7 +19,7 @@ class Session:
         response = self.queue.process((url, self.session.get))
         return next(response)
 
-    def get_all(self, endpoint, params = None):
+    def count(self, endpoint, params = None):
         first_page = self.get(endpoint, params)
         count = first_page.json()['count']
         try:
@@ -31,6 +31,10 @@ class Session:
                     page_count = page_count + 1
             else:
                 page_count = 1
+        return page_count
+
+    def get_all(self, endpoint, params = None):
+        page_count = self.count(endpoint, params)
         responses = self.queue.process([(self.auth.create_url(endpoint, params, page),self.session.get) for page in range(1,page_count + 1)])
         return responses
 

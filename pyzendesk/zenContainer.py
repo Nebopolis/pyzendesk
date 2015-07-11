@@ -36,25 +36,29 @@ class zenContainer:
         self.plural = self.wrapper.all_endpoints[member]['plural']
         if object_id:
             self.endpoint = '{}/{}'.format(self.plural, object_id)
+            self.wrapper.object_cache.set(self.endpoint, self)
         else:
             self.endpoint = '{}'.format(self.plural)
         self.url = self.wrapper.session.create_url(self.endpoint)
-        self.wrapper.object_cache[self.endpoint] = self
         self.get()
 
     def update(self, data):
         if self.id:
             print('put')
             self.wrapper.session.put(self.endpoint, self.raw)
+            self.wrapper.expire_cache(self.endpoint)
+            self.should_refresh = True
         else:
             print('post')
+            self.wrapper.expire_cache(self.endpoint)
             self.wrapper.session.post(self.endpoint, self.raw)
+            self.should_refresh = True
 
     def get(self, cache=True):
         if(self.should_refresh):
             self.should_refresh = False
             if not cache:
-                self.wrapper.queue.cache.delete(self.url)
+                self.wrapper.expire_cache(self.endpoint)
             data = self.wrapper.session.get(self.endpoint).json()[self.singular]
             self.raw.update(data)
         else:
@@ -66,7 +70,7 @@ class zenContainer:
             super().__getattr__(key)
         elif(key is 'should_refresh'):
             return self.raw['should_refresh']
-        elif((key in self.raw['wrapper'].remote_endpoints)):
+        elif((key in self.raw['wrapper'].all_endpoints)):
             if(key in self.raw):
                 return self.raw[key]
             id_key = self.raw['{}_id'.format(key)]
@@ -75,8 +79,9 @@ class zenContainer:
             singular = self.raw['wrapper'].all_endpoints[key]['singular']
             plural = self.raw['wrapper'].all_endpoints[singular]['plural']
             endpoint = '{}/{}'.format(plural, id_key)
-            if(endpoint in self.wrapper.object_cache):
-                 self.raw[key] = self.wrapper.object_cache[endpoint]
+            new_obj = self.wrapper.object_cache.get(endpoint)
+            if new_obj:
+                 self.raw[key] = new_obj
             else:
                 new_obj = zenContainer(self.wrapper, singular, object_id=id_key)
                 self.raw[key] = new_obj
