@@ -31,8 +31,11 @@ class Wrapper:
         self.credentials = credentials
         self.queue = RequestQueue(request_limit=600)
         self.session = Session(self.credentials, self.queue)
-        self.remote_endpoints = {'requester':'user', 'assignee':'user', 'organization': 'organization'}
-        self.all_endpoints = {'ticket':{'plural':'tickets', 'singular':'ticket'}, 'organization':{'plural':'organizations', 'singular':'organization'}}
+        self.remote_endpoints = {'requester':'user', 'assignee':'user', 'organization': 'organization', 'user':'user'}
+        self.all_endpoints = {'ticket':{'plural':'tickets', 'singular':'ticket'}, 
+                            'organization':{'plural':'organizations', 'singular':'organization'},
+                            'requester': {'plural':'users','singular':'user'},
+                            'user': {'plural':'users','singular':'user'}}
         self.object_cache = {}
 
     def get_all(self, member, fetch=False):
@@ -56,11 +59,12 @@ def main():
     # for i in x:
     #     print(i.raw_subject)
 
-    y = iter(z3nbe.get_all('organization', fetch=True))
+    y = iter(z3nbe.get_all('user', fetch=True))
     for i in x:
+        b = i.raw_subject
+        c = i.requester
         if i.organization_id:
-            print(i.organization.created_at)
-        print(i.organization_id)
+            a = i.organization.created_at
 
     # for i in x:
     #     if i.organization_id:
