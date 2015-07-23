@@ -2,6 +2,7 @@ from collections import namedtuple
 
 __author__ = 'bevans'
 
+
 class Endpoint(object):
 
     attributes = {
@@ -108,7 +109,3 @@ class Requester(object):
         url = self.endpoint_url + self.all_url + self.page_url.format(page)
         json = self.session.get(url).json()[self.endpoint_plural]
         return [self.from_data(item) for item in json]
-
-
-
-
