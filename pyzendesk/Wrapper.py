@@ -34,7 +34,7 @@ class Wrapper:
     def get(self, member, object_id, cache=True):
         singular = self.all_endpoints[member]['singular']
         plural = self.all_endpoints[member]['plural']
-        endpoint = '{}/{}'.format(self.plural, object_id)
+        endpoint = '{}/{}'.format(plural, object_id)
         if not cache:
             self.expire_cache(endpoint)
         new_obj = self.object_cache.get(endpoint)

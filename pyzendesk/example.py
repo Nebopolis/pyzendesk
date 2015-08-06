@@ -8,3 +8,5 @@ for ticket in z3nbe.tickets:
     print(ticket.description)
     if ticket.organization:
     	print(ticket.organization.name)
+
+print(z3nbe.tickets(1400).description)

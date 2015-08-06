@@ -31,7 +31,7 @@ class Endpoint:
         return data
 
     def get(self, object_id):
-        return self.wrapper.get(member, object_id)
+        return self.wrapper.get(self.member, object_id)
 
     def __call__(self, key):
         return self.get(key)
