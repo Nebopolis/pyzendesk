@@ -1,0 +1,137 @@
+{
+"title": "ticket",
+"type": "object",
+"description": "schema for a Zendesk ticket",
+"properties": {
+"id": {
+"type": "integer"     
+"readonly": true     
+"description": "Automatically assigned when creating tickets"
+},
+"url": {
+"type": "string"  
+"readonly": true     
+"description": "The API url of this ticket"
+},
+"external_id": {  
+"type": "string"  
+"description": "An id you can use to link Zendesk tickets to local records"
+},
+"type": {
+"type": "string"  
+"description": "The type of this ticket, i.e. 'problem', 'incident', 'question' or 'task'"
+},
+"subject": {  
+"type": "string"  
+"description": "The value of the subject field for this ticket"
+},
+"raw_subject": {   
+"type": "string"  
+"description": "The dynamic content placeholder, if present, or the 'subject' value, if not. See Dynamic Content"
+},
+"description": {    
+"type": "string"  
+"readonly": true     
+"description": "The first comment on the ticket"
+},
+"priority": {  
+"type": "string"  
+"description": "Priority, defines the urgency with which the ticket should be addressed: "urgent", "high", "normal", "low""
+},
+"status": {
+"type": "string"  
+"description": "The state of the ticket, 'new', 'open', 'pending', 'hold', 'solved', 'closed'"
+},
+"recipient": {  
+"type": "string"  
+"description": "The original recipient e-mail address of the ticket"
+},
+"requester_id": {   
+"type": "integer"     
+"mandatory": yes     
+"description": "The user who requested this ticket"
+},
+"submitter_id": {    
+"type": "integer"     
+"description": "The user who submitted the ticket; The submitter always becomes the author of the first comment on the ticket."
+},
+"assignee_id": {     
+"type": "integer"     
+"description": "What agent is currently assigned to the ticket"
+},
+"organization_id": {     
+"type": "integer"     
+"description": "The organization of the requester"
+},
+"group_id": {    
+"type": "integer"     
+"description": "The group this ticket is assigned to"
+},
+"collaborator_ids": {    
+"type": "array"   
+"description": "Who are currently CC'ed on the ticket"
+},
+"forum_topic_id": {  
+"type": "integer"     
+"description": "The topic this ticket originated from, if any"
+},
+"problem_id": {  
+"type": "integer"     
+"description": "The problem this incident is linked to, if any"
+},
+"has_incidents": {   
+"type": "boolean"     
+"readonly": true     
+"description": "Is true of this ticket has been marked as a problem, false otherwise"
+},
+"due_at": {  
+"type": "string"    
+"description": "If this is a ticket of type 'task' it has a due date. Due date format uses ISO 8601 format."
+},
+"tags": {    
+"type": "array"   
+"description": "The array of tags applied to this ticket"
+},
+"via": {     
+"type": "object"     
+"readonly": true     
+"description": "This object explains how the ticket was created"
+},
+"custom_fields": {   
+"type": "array"   
+"description": "The custom fields of the ticket"
+},
+"satisfaction_rating": {     
+"type": "object"  
+"readonly": true     
+"description": "The satisfaction rating of the ticket, if it exists, or the state of satisfaction, 'offered' or 'unoffered'"
+},
+"sharing_agreement_ids": {   
+"type": "array"   
+"readonly": true     
+"description": "The ids of the sharing agreements used for this ticket"
+},
+"followup_ids": {    
+"type": "array"   
+"readonly": true     
+"description": "The ids of the followups created from this ticket - only applicable for closed tickets"
+},
+"ticket_form_id": {  
+"type": "integer"     
+"description": "The id of the ticket form to render for this ticket - only applicable for enterprise accounts"
+},
+"brand_id": {    
+"type": "integer"     
+"description": "The id of the brand this ticket is associated with - only applicable for enterprise accounts"
+},
+"created_at": {  
+"type": "string"    
+"readonly": true     
+"description": "When this record was created"
+},
+"updated_at": {  
+"type": "string"    
+"readonly": true     
+"description": "When this record last got updated"
+}
+}
