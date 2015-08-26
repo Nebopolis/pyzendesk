@@ -21,7 +21,10 @@ class Session:
 
     def count(self, endpoint, params = None):
         first_page = self.get(endpoint, params)
-        count = first_page.json()['count']
+        try:
+            count = first_page.json()['count']
+        except KeyError:
+            count = 1
         try:
             page_count = first_page.json()['page_count']
         except KeyError:

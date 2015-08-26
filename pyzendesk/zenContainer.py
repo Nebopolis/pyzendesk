@@ -70,8 +70,11 @@ class zenContainer:
         self.singular = self.wrapper.all_endpoints[member]['singular']
         self.plural = self.wrapper.all_endpoints[member]['plural']
         if object_id:
+            print(object_id)
             self.endpoint = '{}/{}'.format(self.plural, object_id)
+            print(self.endpoint)
             self.wrapper.object_cache.set(self.endpoint, self)
+            self.audits = self.wrapper.get_all('audits', singular='audit', plural='{}/{}'.format(self.endpoint, 'audits'))
         else:
             self.endpoint = '{}'.format(self.plural)
         self.url = self.wrapper.session.create_url(self.endpoint)

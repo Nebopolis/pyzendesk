@@ -16,17 +16,18 @@ class Wrapper:
                             'organization':{'plural':'organizations', 'singular':'organization'},
                             'requester': {'plural':'users','singular':'user'},
                             'user': {'plural':'users','singular':'user'},
-                            'assignee': {'plural':'users','singular':'user'}}
+                            'assignee': {'plural':'users','singular':'user'},
+                            'audit': {'plural': 'audits', 'singular': 'audit'}}
                             
         self.tickets = Endpoint('ticket', self)
         self.organizations = Endpoint('organization', self)
         self.users = Endpoint('user', self)
 
-    def get_all(self, member, fetch=False):
-        singular = self.all_endpoints[member]['singular']
-        plural = self.all_endpoints[member]['plural']
+    def get_all(self, member, fetch=False, singular=None, plural=None):
+        singular = singular or self.all_endpoints[member]['singular']
+        plural = plural or self.all_endpoints[member]['plural']
         responses = self.session.get_all(plural)
-        objects = itertools.chain.from_iterable(((zenContainer(self, singular, item['id'], data=item) for item in response.json()[plural]) for response in responses))
+        objects = itertools.chain.from_iterable(((zenContainer(self, singular, item['id'], data=item) for item in response.json()[member]) for response in responses))
         if(fetch):
             objects = list(objects)
         return objects

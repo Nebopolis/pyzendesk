@@ -10,3 +10,6 @@ for ticket in z3nbe.tickets:
     	print(ticket.organization.name)
 
 print(z3nbe.tickets(1400).description)
+
+for audit in z3nbe.tickets(1400).audits
+	print(audit)
