@@ -22,16 +22,24 @@ class zenCredentials():
 
 
 class Endpoint:
-    def __init__(self, member, wrapper):
+    def __init__(self, member, wrapper, base_url = None):
         self.member = member
         self.wrapper = wrapper
+        self.base_url = base_url
 
     def get_all(self, fetch=False):
-        data = self.wrapper.get_all(self.member, fetch)
-        return data
+        if self.base_url:
+            plural = self.wrapper.all_endpoints[self.member]['plural']
+            return self.wrapper.get_all(plural, singular=self.member, plural='{}/{}'.format(self.base_url, plural))
+        else:
+            return self.wrapper.get_all(self.member, fetch)
+
 
     def get(self, object_id):
         return self.wrapper.get(self.member, object_id)
+
+    def post(self, data):
+        return self.wrapper.post(self.member, data)
 
     def __call__(self, key):
         return self.get(key)
@@ -70,11 +78,13 @@ class zenContainer:
         self.singular = self.wrapper.all_endpoints[member]['singular']
         self.plural = self.wrapper.all_endpoints[member]['plural']
         if object_id:
-            print(object_id)
             self.endpoint = '{}/{}'.format(self.plural, object_id)
-            print(self.endpoint)
             self.wrapper.object_cache.set(self.endpoint, self)
-            self.audits = self.wrapper.get_all('audits', singular='audit', plural='{}/{}'.format(self.endpoint, 'audits'))
+            if member in self.wrapper.sub_endpoints:
+                for item in self.wrapper.sub_endpoints[member]:
+                    plural = self.wrapper.all_endpoints[item]['plural']
+                    self.__setattr__(plural, Endpoint(item, self.wrapper, base_url=self.endpoint))
+
         else:
             self.endpoint = '{}'.format(self.plural)
         self.url = self.wrapper.session.create_url(self.endpoint)
@@ -89,8 +99,8 @@ class zenContainer:
         else:
             print('post')
             self.wrapper.expire_cache(self.endpoint)
-            self.wrapper.session.post(self.endpoint, self.raw)
-            self.should_refresh = True
+            self = self.wrapper.session.post(self.endpoint, self.raw)
+            
 
     def delete(self):
         if not self.id:

@@ -70,12 +70,12 @@ class RequestQueue:
             result_queue = item[0]
             url = item[1][0]
             do_work = item[1][1]
-            if self.cache.has(url):
-                result_queue.put(self.cache.get(url))
-            else:
-                result = do_work(url)
-                self.cache.set(url, result)
-                result_queue.put(result)
+            # if self.cache.has(url):
+            #     result_queue.put(self.cache.get(url))
+            # else:
+            result = do_work(url)
+            self.cache.set(url, result)
+            result_queue.put(result)
             self.request_queue.task_done()
             self.token_queue.task_done()
 

@@ -18,6 +18,8 @@ class Wrapper:
                             'user': {'plural':'users','singular':'user'},
                             'assignee': {'plural':'users','singular':'user'},
                             'audit': {'plural': 'audits', 'singular': 'audit'}}
+
+        self.sub_endpoints = {'ticket':{'audit'}}
                             
         self.tickets = Endpoint('ticket', self)
         self.organizations = Endpoint('organization', self)
@@ -27,7 +29,7 @@ class Wrapper:
         singular = singular or self.all_endpoints[member]['singular']
         plural = plural or self.all_endpoints[member]['plural']
         responses = self.session.get_all(plural)
-        objects = itertools.chain.from_iterable(((zenContainer(self, singular, item['id'], data=item) for item in response.json()[member]) for response in responses))
+        objects = itertools.chain.from_iterable(((zenContainer(self, singular, item['id'], data=item) for item in response.json()[self.all_endpoints[member]['plural']]) for response in responses))
         if(fetch):
             objects = list(objects)
         return objects
@@ -47,6 +49,12 @@ class Wrapper:
         cache_url = self.credentials.create_url(endpoint)
         self.queue.cache.delete(cache_url)
         self.object_cache.delete(endpoint)
+
+    def post(self, member, data):
+        plural = self.all_endpoints[member]['plural']
+        singular = self.all_endpoints[member]['singular']
+        newdata = self.session.post(plural, data).json()
+        return zenContainer(self, member, data = newdata[singular])
 
         
 def main():

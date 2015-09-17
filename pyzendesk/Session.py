@@ -1,5 +1,6 @@
 import requests
 from RequestQueue import RequestQueue
+import json
 
 __author__ = 'bevans'
 
@@ -41,16 +42,16 @@ class Session:
         responses = self.queue.process([(self.auth.create_url(endpoint, params, page),self.session.get) for page in range(1,page_count + 1)])
         return responses
 
-    def post(self, endpoint, json):
+    def post(self, endpoint, data):
         url = self.auth.create_url(endpoint)
         headers = {'Accept':'application/json', 'Content-Type':'application/json'}
-        response = self.queue.process((url, lambda url: self.session.post(url, data=json, headers=headers)))
+        response = self.queue.process((url, lambda url: self.session.post(url, data=json.dumps(data), headers=headers)))
         return next(response)
 
-    def put(self, endpoint, json):
+    def put(self, endpoint, data):
         url = self.auth.create_url(endpoint)
         headers = {'Accept':'application/json', 'Content-Type':'application/json'}
-        response = self.queue.process((url, lambda url: self.session.put(url, data=json, headers=headers)))
+        response = self.queue.process((url, lambda url: self.session.put(url, data=json.dumps(data), headers=headers)))
         return next(response)
 
 
